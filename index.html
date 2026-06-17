@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>校园便民小程序</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Microsoft Yahei", sans-serif;
+        }
+        body {
+            background: #f5faf7;
+            max-width: 430px;
+            margin: 0 auto;
+            min-height: 100vh;
+            padding-bottom: 70px;
+        }
+        /* 顶部导航 绿色主题 */
+        .top-bar {
+            background: #38b069;
+            color: #fff;
+            text-align: center;
+            padding: 12px 0;
+            font-size: 18px;
+            font-weight: 500;
+            position: sticky;
+            top: 0;
+            z-index: 99;
+        }
+        /* 公告模块 */
+        .notice-box {
+            margin: 10px;
+            background: #fff;
+            border-radius: 8px;
+            padding: 12px;
+        }
+        .notice-title {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #333;
+            display: flex;
+            justify-content: space-between;
+        }
+        .notice-item {
+            font-size: 14px;
+            color: #666;
+            line-height: 1.6;
+            padding: 4px 0;
+            border-bottom: 1px solid #eee;
+        }
+        /* 快捷功能区 */
+        .func-wrap {
+            margin: 10px;
+            background: #fff;
+            border-radius: 8px;
+            padding: 15px;
+        }
+        .func-title {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 12px;
+            color: #333;
+        }
+        .func-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        .func-item {
+            background: #e6f7ef;
+            text-align: center;
+            padding: 16px 0;
+            border-radius: 6px;
+            color: #38b069;
+            font-size: 14px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .func-item:active {
+            background: #38b069;
+            color: #fff;
+        }
+        /* 通用卡片 */
+        .card {
+            margin: 10px;
+            background: #fff;
+            border-radius: 8px;
+            padding: 12px;
+        }
+        .card-title {
+            font-weight: bold;
+            font-size: 16px;
+            margin-bottom: 10px;
+            color: #333;
+            display: flex;
+            justify-content: space-between;
+        }
+        .publishing-btn {
+            background: #38b069;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            padding: 3px 8px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        .post-item {
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+            font-size: 14px;
+            color: #555;
+        }
+        .post-op {
+            margin-top: 6px;
+            display: flex;
+            gap: 16px;
+            font-size: 13px;
+            color: #888;
+        }
+        .op-btn {
+            cursor: pointer;
+        }
+        .op-active {
+            color: #38b069 !important;
+        }
+        /* 底部tab导航 */
+        .tab-bar {
+            position: fixed;
+            bottom: 0;
+            max-width: 430px;
+            width: 100%;
+            height: 64px;
+            background: #fff;
+            display: flex;
+            border-top: 1px solid #ddd;
+        }
+        .tab-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            color: #999;
+            cursor: pointer;
+        }
+        .tab-item.active {
+            color: #38b069;
+        }
+        .tab-icon {
+            font-size: 20px;
+            margin-bottom: 4px;
+        }
+        /* 页面切换 */
+        .page {
+            display: none;
+        }
+        .page.active {
+            display: block;
+        }
+        /* 弹窗遮罩 */
+        .mask {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 999;
+            display: none;
+        }
+        .mask.show {
+            display: block;
+        }
+        .popup-box {
+            width: 90%;
+            max-width: 380px;
+            background: #fff;
+            border-radius: 10px;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 16px;
+            max-height: 85vh;
+            overflow-y: auto;
+        }
+        .pop-title {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 12px;
+            color: #333;
+            display: flex;
+            justify-content: space-between;
+        }
+        .close-pop {
+            color: #999;
+            cursor: pointer;
+            font-size: 20px;
+        }
+        .pop-desc {
+            font-size: 14px;
+            line-height: 1.7;
+            color: #555;
+            margin-bottom: 15px;
+        }
+        .pop-btn-group {
+            display: flex;
+            gap: 10px;
+            margin-top:12px;
+        }
+        .pop-btn {
+            flex: 1;
+            text-align: center;
+            padding: 8px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+        }
+        .pop-green {
+            background: #38b069;
+            color: #fff;
+        }
+        .pop-gray {
+            background: #eee;
+            color: #666;
+        }
+        /* 输入框 */
+        textarea, input, select {
+            width: 100%;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 8px;
+            margin: 8px 0;
+            font-size: 14px;
+        }
+        /* 校园地图图片样式 */
+        .map-img-box {
+            width: 100%;
+            height: 220px;
+            background:#e6f7ef;
+            border-radius:6px;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            color:#38b069;
+            margin:8px 0;
+            overflow:hidden;
+        }
+        .map-img-box img{
+            width:100%;
+            height:100%;
+            object-fit:cover;
+        }
+        /* 提示弹窗（发布成功） */
+        .toast {
+            position:fixed;
+            top:40%;
+            left:50%;
+            transform:translate(-50%,-50%);
+            background:rgba(0,0,0,0.7);
+            color:#fff;
+            padding:10px 20px;
+            border-radius:6px;
+            font-size:14px;
+            z-index:9999;
+            display:none;
+        }
+        /* 评论列表 */
+        .comment-item{
+            font-size:13px;
+            padding:6px 0;
+            border-bottom:1px solid #f0f0f0;
+            color:#444;
+        }
+    </style>
+</head>
+<body>
+    <!-- 顶部标题 -->
+    <div class="top-bar">校园便民小程序</div>
+
+    <!-- 首页页面（独立内容，无重复） -->
+    <div id="page-home" class="page active">
+        <div class="notice-box">
+            <div class="notice-title">
+                <span>校园公告</span>
+                <span style="font-size:12px;color:#999">更多</span>
+            </div>
+            <div class="notice-item">【活动】本周六校园社团招新活动开启</div>
+            <div class="notice-item">【后勤】周三下午2号宿舍楼停水检修</div>
+            <div class="notice-item">【通知】期末复习周安排已发布</div>
+        </div>
+
+        <div class="func-wrap">
+            <div class="func-title">快捷服务（点击查看）</div>
+            <div class="func-grid">
+                <div class="func-item" data-pop="pop-lost">失物招领</div>
+                <div class="func-item" data-pop="pop-second">二手闲置</div>
+                <div class="func-item" data-pop="pop-classroom">空教室查询</div>
+                <div class="func-item" data-pop="pop-map">校园地图</div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">今日校园动态</div>
+            <div class="post-item">
+                找考研学习搭子，图书馆三楼长期自习！
+                <div class="post-op">
+                    <span class="op-btn like">👍点赞 23</span>
+                    <span class="op-btn commentBtn">💬评论 8</span>
+                    <span class="op-btn collect">⭐收藏</span>
+                </div>
+            </div>
+            <div class="post-item">
+                捡到黑色校园卡，三号食堂门口，速来认领
+                <div class="post-op">
+                    <span class="op-btn like">👍点赞 41</span>
+                    <span class="op-btn commentBtn">💬评论 12</span>
+                    <span class="op-btn collect">⭐收藏</span>
+                </div>
+            </div>
+            <div class="post-item">
+                出九成新电动车，续航一周，校内可当面看车
+                <div class="post-op">
+                    <span class="op-btn like">👍点赞 17</span>
+                    <span class="op-btn commentBtn">💬评论 6</span>
+                    <span class="op-btn collect">⭐收藏</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 校园广场页面 -->
+    <div id="page-square" class="page">
+        <div class="card">
+            <div class="card-title">
+                表白墙
+                <button class="publishing-btn" data-pop="pop-publish">发布表白</button>
+            </div>
+            <div class="post-item">
+                匿名：喜欢经管院3班的男生很久了，每次图书馆都能遇见
+                <div class="post-op">
+                    <span class="op-btn like">👍点赞 56</span>
+                    <span class="op-btn commentBtn">💬评论 21</span>
+                </div>
+            </div>
+            <div class="post-item">
+                匿名：感谢昨天帮我搬书的学姐，人超好！
+                <div class="post-op">
+                    <span class="op-btn like">👍点赞 32</span>
+                    <span class="op-btn commentBtn">💬评论 7</span>
+                </div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-title">
+                找搭子
+                <button class="publishing-btn" data-pop="pop-publish">发布搭子</button>
+            </div>
+            <div class="post-item">
+                干饭搭子：三餐固定二食堂，有无同行？
+                <div class="post-op">
+                    <span class="op-btn like">👍点赞 14</span>
+                    <span class="op-btn commentBtn">💬评论 9</span>
+                </div>
+            </div>
+            <div class="post-item">
+                运动搭子：每晚7点操场跑步，求伴打卡
+                <div class="post-op">
+                    <span class="op-btn like">👍点赞 28</span>
+                    <span class="op-btn commentBtn">💬评论 15</span>
+                </div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-title">校园求助问答</div>
+            <div class="post-item">请问补办学生证流程是什么？在哪办理？</div>
+            <div class="post-item">图书馆周一到周五几点关门？</div>
+        </div>
+    </div>
+
+    <!-- 便民工具页面（完全独立内容，无重复） -->
+    <div id="page-tool" class="page">
+        <div class="func-wrap">
+            <div class="func-title">全部便民工具（点击打开）</div>
+            <div class="func-grid">
+                <div class="func-item" data-pop="pop-lost">发布失物</div>
+                <div class="func-item" data-pop="pop-second">上架二手</div>
+                <div class="func-item" data-pop="pop-classroom">自习教室</div>
+                <div class="func-item" data-pop="pop-map">校园导览</div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-title">校园办事指南</div>
+            <div class="post-item">校园卡挂失：后勤一楼大厅工作时间8:30-17:00</div>
+            <div class="post-item">医务室：二食堂旁，夜间急诊电话13800138000</div>
+            <div class="post-item">快递站：校门口右侧，每日10:00-20:00营业</div>
+        </div>
+        <div class="card">
+            <div class="card-title">校内商家推荐</div>
+            <div class="post-item">打印店：图书馆一楼，黑白0.1元/张</div>
+            <div class="post-item">奶茶店：三食堂一楼，每日第二杯半价</div>
+        </div>
+    </div>
+
+    <!-- 我的页面 -->
+    <div id="page-mine" class="page">
+        <div class="card">
+            <div style="text-align:center;padding:20px 0;">
+                <div style="width:70px;height:70px;background:#e6f7ef;border-radius:50%;margin:0 auto 10px;"></div>
+                <div>校园用户</div>
+                <div style="font-size:12px;color:#666;margin-top:4px;">未实名认证</div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="post-item">我的发布（3条）</div>
+            <div class="post-item">我的收藏（8条）</div>
+            <div class="post-item">消息通知（2条未读）</div>
+            <div class="post-item">意见反馈</div>
+            <div class="post-item">关于我们</div>
+        </div>
+        <div class="card">
+            <div class="card-title">快捷设置</div>
+            <div class="post-item">消息推送开关</div>
+            <div class="post-item">清除缓存</div>
+        </div>
+    </div>
+
+    <!-- 底部导航 -->
+    <div class="tab-bar">
+        <div class="tab-item active" data-page="page-home">
+            <div class="tab-icon">🏠</div>
+            <span>首页</span>
+        </div>
+        <div class="tab-item" data-page="page-square">
+            <div class="tab-icon">📢</div>
+            <span>校园广场</span>
+        </div>
+        <div class="tab-item" data-page="page-tool">
+            <div class="tab-icon">🛠️</div>
+            <span>便民工具</span>
+        </div>
+        <div class="tab-item" data-page="page-mine">
+            <div class="tab-icon">👤</div>
+            <span>我的</span>
+        </div>
+    </div>
+
+    <!-- 全局提示弹窗 -->
+    <div class="toast" id="toast"></div>
+
+    <!-- 弹窗遮罩 -->
+    <div class="mask" id="mask">
+        <!-- 1.失物招领弹窗 -->
+        <div class="popup-box" id="pop-lost">
+            <div class="pop-title">
+                发布失物/拾物信息
+                <span class="close-pop">×</span>
+            </div>
+            <select>
+                <option>我丢失了物品</option>
+                <option>我捡到了物品</option>
+            </select>
+            <input placeholder="物品名称（例：白色蓝牙耳机）">
+            <input placeholder="丢失/捡到地点">
+            <textarea placeholder="详细描述+联系方式"></textarea>
+            <div class="pop-btn-group">
+                <button class="pop-btn pop-gray close-pop">取消</button>
+                <button class="pop-btn pop-green submitBtn">提交发布</button>
+            </div>
+        </div>
+
+        <!-- 2.二手闲置弹窗 -->
+        <div class="popup-box" id="pop-second" style="display:none">
+            <div class="pop-title">
+                上架二手闲置
+                <span class="close-pop">×</span>
+            </div>
+            <select>
+                <option>书籍资料</option>
+                <option>数码电器</option>
+                <option>生活用品</option>
+                <option>代步电动车</option>
+            </select>
+            <input placeholder="物品名称">
+            <input placeholder="期望价格">
+            <textarea placeholder="成色、交易地点、使用时长"></textarea>
+            <div class="pop-btn-group">
+                <button class="pop-btn pop-gray close-pop">取消</button>
+                <button class="pop-btn pop-green submitBtn">上架商品</button>
+            </div>
+        </div>
+
+        <!-- 3.空教室查询弹窗 -->
+        <div class="popup-box" id="pop-classroom" style="display:none">
+            <div class="pop-title">
+                空闲自习教室筛选
+                <span class="close-pop">×</span>
+            </div>
+            <select>
+                <option>全部教学楼</option>
+                <option>第一教学楼</option>
+                <option>第三教学楼</option>
+                <option>图书馆自习区</option>
+            </select>
+            <div class="pop-desc">
+                当前空闲教室：<br>
+                1教201、1教205、3教402、图书馆三楼全区域<br>
+                14:00-16:00 2教全部有课，暂不可自习
+            </div>
+            <div class="pop-btn-group">
+                <button class="pop-btn pop-green close-pop">确认查看</button>
+            </div>
+        </div>
+
+        <!-- 4.校园地图弹窗【新增地图图片】 -->
+        <div class="popup-box" id="pop-map" style="display:none">
+            <div class="pop-title">
+                校园全景地图
+                <span class="close-pop">×</span>
+            </div>
+            <div class="map-img-box">
+                <!-- 替换src内链接为你的校园地图图片本地/网络地址 -->
+                <img src="https://picsum.photos/id/1036/400/220" alt="校园地图">
+            </div>
+            <div class="pop-desc">
+                地标标注：一/二食堂、快递站、医务室、教学楼、打印店、操场、全部宿舍区
+                点击地图点位可查看路线指引
+            </div>
+            <div class="pop-btn-group">
+                <button class="pop-btn pop-green close-pop">关闭地图</button>
+            </div>
+        </div>
+
+        <!-- 5.发布表白/搭子弹窗 -->
+        <div class="popup-box" id="pop-publish" style="display:none">
+            <div class="pop-title">
+                发布校园动态
+                <span class="close-pop">×</span>
+            </div>
+            <textarea placeholder="输入内容，文明发言"></textarea>
+            <div style="margin:6px 0;font-size:13px;color:#666;">
+                <input type="checkbox" checked id="anonCheck"> 匿名发布
+            </div>
+            <div class="pop-btn-group">
+                <button class="pop-btn pop-gray close-pop">取消</button>
+                <button class="pop-btn pop-green submitBtn">立即发布</button>
+            </div>
+        </div>
+
+        <!-- 6.评论弹窗 -->
+        <div class="popup-box" id="pop-comment" style="display:none">
+            <div class="pop-title">
+                评论区
+                <span class="close-pop">×</span>
+            </div>
+            <div class="comment-list">
+                <div class="comment-item">用户1：我也想找考研搭子，一起图书馆！</div>
+                <div class="comment-item">用户2：请问是每天几点自习？</div>
+                <div class="comment-item">用户3：可以加个联系方式一起复习</div>
+            </div>
+            <textarea placeholder="写下你的评论..."></textarea>
+            <div class="pop-btn-group">
+                <button class="pop-btn pop-green submitBtn">发送评论</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Toast提示函数
+        function showToast(text){
+            const toast = document.getElementById('toast');
+            toast.innerText = text;
+            toast.style.display = 'block';
+            setTimeout(()=>{
+                toast.style.display = 'none';
+            },1200)
+        }
+
+        // Tab页面切换
+        const tabs = document.querySelectorAll('.tab-item');
+        const pages = document.querySelectorAll('.page');
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                tabs.forEach(t => t.classList.remove('active'));
+                pages.forEach(p => p.classList.remove('active'));
+                tab.classList.add('active');
+                const targetId = tab.getAttribute('data-page');
+                document.getElementById(targetId).classList.add('active');
+            })
+        })
+
+        // 弹窗基础逻辑
+        const mask = document.getElementById('mask');
+        const allPopups = document.querySelectorAll('.popup-box');
+        const funcBtns = document.querySelectorAll('[data-pop]');
+        const closeBtns = document.querySelectorAll('.close-pop');
+        const commentBtn = document.querySelectorAll('.commentBtn');
+        const submitBtns = document.querySelectorAll('.submitBtn');
+
+        // 打开功能弹窗
+        funcBtns.forEach(item => {
+            item.addEventListener('click', () => {
+                const popId = item.getAttribute('data-pop');
+                allPopups.forEach(p => p.style.display = 'none');
+                document.getElementById(popId).style.display = 'block';
+                mask.classList.add('show');
+            })
+        })
+
+        // 打开评论弹窗
+        commentBtn.forEach(btn=>{
+            btn.addEventListener('click',()=>{
+                allPopups.forEach(p => p.style.display = 'none');
+                document.getElementById('pop-comment').style.display = 'block';
+                mask.classList.add('show');
+            })
+        })
+
+        // 提交按钮发布成功提示
+        submitBtns.forEach(btn=>{
+            btn.addEventListener('click',()=>{
+                mask.classList.remove('show');
+                showToast("发布成功！");
+            })
+        })
+
+        // 关闭弹窗
+        closeBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                mask.classList.remove('show');
+            })
+        })
+
+        // 点击遮罩空白关闭弹窗
+        mask.addEventListener('click', (e) => {
+            if(e.target === mask) mask.classList.remove('show');
+        })
+
+        // 点赞交互切换绿色
+        const likeBtns = document.querySelectorAll('.like');
+        likeBtns.forEach(btn => {
+            btn.addEventListener('click', function(){
+                this.classList.toggle('op-active');
+                if(this.classList.contains('op-active')){
+                    let num = parseInt(this.innerText.match(/\d+/)[0]) + 1;
+                    this.innerText = `👍点赞 ${num}`;
+                }else{
+                    let num = parseInt(this.innerText.match(/\d+/)[0]) - 1;
+                    this.innerText = `👍点赞 ${num}`;
+                }
+            })
+        })
+
+        // 收藏切换
+        const collectBtns = document.querySelectorAll('.collect');
+        collectBtns.forEach(btn=>{
+            btn.addEventListener('click',function(){
+                this.classList.toggle('op-active');
+                if(this.classList.contains('op-active')){
+                    this.innerText = "⭐已收藏";
+                }else{
+                    this.innerText = "⭐收藏";
+                }
+            })
+        })
+    </script>
+</body>
+</html>
